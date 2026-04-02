@@ -200,14 +200,13 @@ td{padding:9px 12px;text-align:center;vertical-align:middle}
 <div id="ov2">
   <canvas id="cv"></canvas>
   <div class="chosen-card" id="chosenCard">
-    <span class="ccrown">👑</span>
+    <span class="ccrown" id="ccrown">👑</span>
     <div class="clbl">✦ 天 選 之 人 ✦</div>
     <div class="cname"  id="cname"></div>
     <div class="clist"  id="clist"></div>
     <div class="csub"   id="csub"></div>
     <div class="cprob"  id="cprob"></div>
-    <button class="cbtn" id="btnConfirm">✅ 確認出差</button>
-    <button class="cbtn" id="btnClose">我認命了 🫡</button>
+    <button class="cbtn" id="btnClose">我認命了</button>
   </div>
 </div>
 
@@ -391,7 +390,7 @@ function startSlot(winner, prob, cur, total, callback){
   sd.textContent='???';
   prog.textContent= total>1 ? '第 '+(cur+1)+' / '+total+' 位' : '';
 
-  var dur=2500+Math.random()*1500, di=0;
+  var dur=1500+Math.random()*1000, di=0;
   var t1=setInterval(function(){
     dots.forEach(function(d){d.classList.remove('on');});
     dots[di%5].classList.add('on'); di++;
@@ -408,10 +407,9 @@ function startSlot(winner, prob, cur, total, callback){
     setTimeout(function(){
       ov.classList.remove('on');
       callback();
-    },700);
+    },500);
   },dur);
 }
-
 /* ---- 顯示最終結果 ---- */
 function showFinalResult(winners, probs){
   var rb=document.getElementById('rbox');
@@ -421,10 +419,13 @@ function showFinalResult(winners, probs){
   if(winners.length===1){
     var w=winners[0], p=probs[0];
     rb.innerHTML=
-      '<div class="rwin">🎯 '+eh(w.name)+'</div>'+
-      '<div class="rdet">長差天數：'+w.days+' 天 ／ 抽中機率：'+p.toFixed(1)+'%</div>';
-    pushH(ts+' → '+w.name+'（'+w.days+'天，'+p.toFixed(1)+'%）', p<10);
-    if(p<10) setTimeout(function(){showChosen([w],[p]);},400);
+      '<div class="rwin">🎯 '+eh(w.name)+'</div>';
+    pushH(ts+' → '+w.name+'（'+p.toFixed(1)+'%）', p<10);
+    if(p<10){
+      setTimeout(function(){ showChosen([w],[p]); },400);
+    } else {
+      setTimeout(function(){ showLoser([w]); },400);
+    }
   } else {
     var tags='', names=[], anyChosen=false;
     for(var i=0;i<winners.length;i++){
@@ -436,20 +437,46 @@ function showFinalResult(winners, probs){
       '<div class="rwin">🎯 本次抽出 '+winners.length+' 人</div>'+
       '<div class="rtags">'+tags+'</div>';
     pushH(ts+' → '+names.join('、'), anyChosen);
-    if(anyChosen) setTimeout(function(){showChosen(winners,probs);},400);  // ✅ 只留這行
+    if(anyChosen){
+      setTimeout(function(){ showChosen(winners,probs); },400);
+    } else {
+      setTimeout(function(){ showLoser(winners); },400);  // ← 直接傳 winners
+    }
   }
   rb.classList.remove('flash'); void rb.offsetWidth; rb.classList.add('flash');
+}
+/* ---- 就是你啦 卡片 ---- */
+function showLoser(people){
+  document.getElementById('cname').style.display='none';
+  document.getElementById('clist').style.display='none';
+  document.getElementById('csub').style.display='none';
+  document.getElementById('cprob').style.display='none';
+  document.querySelector('#chosenCard .clbl').textContent='✦ 就 是 你 啦 ✦';
+  if(people.length===1){
+    document.getElementById('cname').textContent=people[0].name;
+    document.getElementById('cname').style.display='block';
+    document.getElementById('csub').style.display='block';
+  } else {
+    var html='';
+    for(var i=0;i<people.length;i++){
+      html+='<span class="ctag">'+eh(people[i].name)+'</span>';
+    }
+    document.getElementById('clist').innerHTML=html;
+    document.getElementById('clist').style.display='flex';
+    document.getElementById('csub').textContent='共 '+people.length+' 位';
+    document.getElementById('csub').style.display='block';
+  }
+  document.getElementById('ov2').classList.add('on');
+  launchConfetti();
 }
 /* ---- 天選之人卡片 ---- */
 function showChosen(winners, probs){
   var isSingle = winners.length===1;
-  document.getElementById('ccrown').style.display = 'block'; /* 確保顯示 */
   if(isSingle){
     /* 單人：顯示姓名＋詳細資訊 */
     document.getElementById('cname').textContent  = winners[0].name;
     document.getElementById('cname').style.display = 'block';
     document.getElementById('clist').style.display = 'none';
-    document.getElementById('csub').textContent   = '長差天數：'+winners[0].days+' 天';
     document.getElementById('cprob').textContent  = '抽中機率僅 '+probs[0].toFixed(1)+'%，命中注定 🔥';
     document.getElementById('cprob').style.display = 'inline-block';
   } else {
@@ -469,6 +496,8 @@ function showChosen(winners, probs){
 }
 function closeChosen(){
   document.getElementById('ov2').classList.remove('on');
+  // 關閉時還原標題
+  document.querySelector('#chosenCard .clbl').textContent = '✦ 天 選 之 人 ✦';
   if(cfId){ cancelAnimationFrame(cfId); cfId=null; }
   var c=document.getElementById('cv');
   c.getContext('2d').clearRect(0,0,c.width,c.height);
@@ -527,6 +556,7 @@ window.onload=function(){
     if(e.key==='Enter') addPerson();
   });
 };
+document.getElementById('btnClose').onclick   = function(){ closeChosen(); }
 </script>
 </body>
 </html>
