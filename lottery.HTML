@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎲 長差抽籤程式</title>
     <style>
-        /* ── Reset & Base ── */
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
@@ -31,24 +30,14 @@
             text-align: center;
             color: white;
         }
-
-        .header h1 {
-            font-size: 2rem;
-            letter-spacing: 2px;
-            margin-bottom: 6px;
-        }
-
-        .header p {
-            font-size: 0.95rem;
-            opacity: 0.85;
-        }
+        .header h1 { font-size: 2rem; letter-spacing: 2px; margin-bottom: 6px; }
+        .header p  { font-size: 0.95rem; opacity: 0.85; }
 
         /* ── Section ── */
         .section {
             padding: 24px 30px;
             border-bottom: 1px solid #e8edf2;
         }
-
         .section:last-child { border-bottom: none; }
 
         .section-title {
@@ -60,12 +49,10 @@
             align-items: center;
             gap: 8px;
         }
-
         .section-title::before {
             content: "";
             display: inline-block;
-            width: 4px;
-            height: 18px;
+            width: 4px; height: 18px;
             background: linear-gradient(#667eea, #764ba2);
             border-radius: 2px;
         }
@@ -77,19 +64,16 @@
             gap: 20px;
             align-items: center;
         }
-
         .control-group {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-
         .control-group label {
             font-size: 0.95rem;
             color: #4a5568;
             white-space: nowrap;
         }
-
         .control-group input[type="number"] {
             width: 80px;
             padding: 8px 10px;
@@ -101,17 +85,10 @@
             transition: border-color 0.2s;
             font-family: inherit;
         }
+        .control-group input[type="number"]:focus { border-color: #667eea; }
+        .hint { font-size: 0.82rem; color: #a0aec0; }
 
-        .control-group input[type="number"]:focus {
-            border-color: #667eea;
-        }
-
-        .hint {
-            font-size: 0.82rem;
-            color: #a0aec0;
-        }
-
-        /* ── Button ── */
+        /* ── Buttons ── */
         .btn {
             padding: 9px 20px;
             border: none;
@@ -119,37 +96,17 @@
             font-size: 0.95rem;
             font-family: inherit;
             cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+            transition: transform 0.15s, box-shadow 0.15s;
             font-weight: bold;
         }
-
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .btn:hover  { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .btn:active { transform: translateY(0); }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #48bb78, #38a169);
-            color: white;
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, #f6ad55, #ed8936);
-            color: white;
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #fc8181, #e53e3e);
-            color: white;
-        }
-
-        .btn-sm {
-            padding: 5px 12px;
-            font-size: 0.82rem;
-        }
+        .btn-primary { background: linear-gradient(135deg,#667eea,#764ba2); color:white; }
+        .btn-success { background: linear-gradient(135deg,#48bb78,#38a169); color:white; }
+        .btn-warning { background: linear-gradient(135deg,#f6ad55,#ed8936); color:white; }
+        .btn-danger  { background: linear-gradient(135deg,#fc8181,#e53e3e); color:white; }
+        .btn-info    { background: linear-gradient(135deg,#63b3ed,#3182ce); color:white; }
+        .btn-sm      { padding: 5px 12px; font-size: 0.82rem; }
 
         /* ── Table ── */
         .table-wrapper {
@@ -157,161 +114,275 @@
             border-radius: 10px;
             border: 1px solid #e2e8f0;
         }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.93rem;
-        }
-
-        thead tr {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        thead th {
-            padding: 12px 14px;
-            text-align: center;
-            font-weight: bold;
-            white-space: nowrap;
-        }
-
-        tbody tr {
-            transition: background 0.15s;
-        }
-
+        table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+        thead tr { background: linear-gradient(135deg,#667eea,#764ba2); color:white; }
+        thead th { padding: 12px 14px; text-align:center; font-weight:bold; white-space:nowrap; }
         tbody tr:nth-child(odd)  { background: #f9fafb; }
         tbody tr:nth-child(even) { background: #ffffff; }
         tbody tr:hover { background: #edf2ff; }
+        tbody td { padding: 10px 14px; text-align:center; vertical-align:middle; }
 
-        tbody td {
-            padding: 10px 14px;
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        /* 姓名欄 input */
         .name-input {
-            width: 100%;
-            min-width: 80px;
+            width: 100%; min-width: 80px;
             padding: 6px 8px;
-            border: 2px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 0.93rem;
-            text-align: center;
-            outline: none;
-            font-family: inherit;
+            border: 2px solid #e2e8f0; border-radius: 6px;
+            font-size: 0.93rem; text-align:center;
+            outline: none; font-family: inherit;
             transition: border-color 0.2s;
         }
-
         .name-input:focus { border-color: #667eea; }
 
-        /* 天數 input */
         .days-input {
-            width: 75px;
-            padding: 6px 8px;
-            border: 2px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 0.93rem;
-            text-align: center;
-            outline: none;
-            font-family: inherit;
+            width: 75px; padding: 6px 8px;
+            border: 2px solid #e2e8f0; border-radius: 6px;
+            font-size: 0.93rem; text-align:center;
+            outline: none; font-family: inherit;
             transition: border-color 0.2s;
         }
-
         .days-input:focus { border-color: #667eea; }
 
-        /* 機率 bar */
-        .prob-cell {
-            min-width: 110px;
-        }
-
+        .prob-cell { min-width: 120px; }
         .prob-bar-bg {
-            background: #e2e8f0;
-            border-radius: 20px;
-            height: 10px;
-            overflow: hidden;
-            margin-top: 4px;
+            background: #e2e8f0; border-radius: 20px;
+            height: 10px; overflow: hidden; margin-top: 4px;
         }
-
         .prob-bar-fill {
-            height: 10px;
-            border-radius: 20px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 10px; border-radius: 20px;
+            background: linear-gradient(90deg,#667eea,#764ba2);
             transition: width 0.5s ease;
         }
+        .prob-text { font-size: 0.88rem; font-weight:bold; color:#553c9a; }
 
-        .prob-text {
-            font-size: 0.88rem;
+        /* weight badge */
+        .weight-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            background: #fed7e2;
+            color: #c53030;
+            border-radius: 10px;
+            padding: 1px 7px;
+            margin-left: 4px;
             font-weight: bold;
-            color: #553c9a;
         }
 
-        /* ── Action Buttons Row ── */
+        /* ── Actions ── */
         .actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
+            display: flex; flex-wrap: wrap;
+            gap: 12px; justify-content: center;
             padding: 20px 30px;
         }
 
-        /* ── Result ── */
+        /* ── Result Box ── */
         .result-box {
             margin: 0 30px 24px;
-            border-radius: 16px;
-            padding: 24px;
+            border-radius: 16px; padding: 24px;
             text-align: center;
             background: #f7f5ff;
             border: 2px dashed #b794f4;
             min-height: 90px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
             transition: all 0.4s;
         }
-
         .result-box.highlight {
-            background: linear-gradient(135deg, #fff5f5, #fef2f2);
+            background: linear-gradient(135deg,#fff5f5,#fef2f2);
             border-color: #fc8181;
             animation: pulse 0.6s ease;
         }
-
+        .result-box.chosen {
+            background: linear-gradient(135deg,#fffff0,#fefcbf);
+            border-color: #f6e05e;
+            animation: pulse 0.6s ease;
+        }
         @keyframes pulse {
             0%   { transform: scale(1); }
             50%  { transform: scale(1.03); }
             100% { transform: scale(1); }
         }
 
-        .result-waiting {
-            font-size: 1rem;
-            color: #a0aec0;
+        .result-waiting  { font-size:1rem; color:#a0aec0; }
+        .result-winner   { font-size:1.7rem; font-weight:bold; color:#e53e3e; margin-bottom:6px; }
+        .result-winner.chosen-text { color: #b7791f; }
+        .result-detail   { font-size:0.88rem; color:#718096; }
+
+        /* ── DRAW OVERLAY ── */
+        #drawOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.82);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        #drawOverlay.active { display: flex; }
+
+        .slot-machine {
+            background: linear-gradient(160deg,#1a1a2e,#16213e,#0f3460);
+            border: 3px solid #f6ad55;
+            border-radius: 20px;
+            padding: 40px 60px;
+            text-align: center;
+            box-shadow: 0 0 60px rgba(246,173,85,0.4);
+            min-width: 320px;
+            position: relative;
         }
 
-        .result-winner {
-            font-size: 1.7rem;
+        .slot-title {
+            color: #f6ad55;
+            font-size: 1.1rem;
+            letter-spacing: 3px;
+            margin-bottom: 24px;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%,100% { opacity:1; }
+            50%      { opacity:0.4; }
+        }
+
+        .slot-display {
+            background: #0a0a0a;
+            border: 2px solid #4a9eff;
+            border-radius: 12px;
+            padding: 18px 30px;
+            font-size: 2rem;
             font-weight: bold;
-            color: #e53e3e;
-            margin-bottom: 6px;
+            color: #4affb4;
+            min-width: 220px;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 2px;
+            box-shadow: inset 0 0 20px rgba(74,159,255,0.2),
+                        0 0 20px rgba(74,255,180,0.15);
+            transition: color 0.1s;
         }
 
-        .result-detail {
-            font-size: 0.88rem;
-            color: #718096;
+        .slot-display.rolling { animation: colorShift 0.15s infinite; }
+        @keyframes colorShift {
+            0%   { color: #4affb4; }
+            25%  { color: #f6ad55; }
+            50%  { color: #fc8181; }
+            75%  { color: #b794f4; }
+            100% { color: #4affb4; }
+        }
+
+        .slot-dots {
+            margin-top: 20px;
+            display: flex; gap: 10px; justify-content: center;
+        }
+        .dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: #4a5568;
+            transition: background 0.3s;
+        }
+        .dot.active { background: #f6ad55; box-shadow: 0 0 8px #f6ad55; }
+
+        /* ── CHOSEN OVERLAY ── */
+        #chosenOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            pointer-events: none;
+        }
+        #chosenOverlay.active {
+            display: flex;
+            pointer-events: all;
+        }
+
+        .chosen-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, rgba(255,215,0,0.15) 0%, rgba(0,0,0,0.9) 70%);
+        }
+
+        .chosen-content {
+            position: relative;
+            text-align: center;
+            animation: chosenAppear 0.8s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes chosenAppear {
+            0%   { transform: scale(0) rotate(-10deg); opacity:0; }
+            100% { transform: scale(1) rotate(0deg);  opacity:1; }
+        }
+
+        .chosen-crown { font-size: 5rem; animation: float 2s ease-in-out infinite; }
+        @keyframes float {
+            0%,100% { transform: translateY(0); }
+            50%      { transform: translateY(-15px); }
+        }
+
+        .chosen-title {
+            font-size: 1.5rem;
+            color: #ffd700;
+            letter-spacing: 6px;
+            margin: 10px 0;
+            text-shadow: 0 0 20px #ffd700;
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700; }
+            to   { text-shadow: 0 0 20px #ffd700, 0 0 40px #ff8c00, 0 0 60px #ff4500; }
+        }
+
+        .chosen-name {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 30px #ffd700, 0 0 60px #ffd700;
+            margin: 8px 0;
+        }
+
+        .chosen-subtitle {
+            font-size: 1rem;
+            color: #ffd700;
+            opacity: 0.8;
+            letter-spacing: 2px;
+        }
+
+        .chosen-close-btn {
+            margin-top: 30px;
+            padding: 12px 40px;
+            background: linear-gradient(135deg,#ffd700,#ff8c00);
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #1a1a1a;
+            cursor: pointer;
+            font-family: inherit;
+            transition: transform 0.2s, box-shadow 0.2s;
+            pointer-events: all;
+        }
+        .chosen-close-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255,215,0,0.6);
+        }
+
+        /* ── Confetti Canvas ── */
+        #confettiCanvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1999;
         }
 
         /* ── History ── */
         .history-list {
             list-style: none;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
             gap: 6px;
             max-height: 180px;
             overflow-y: auto;
             padding: 4px 0;
         }
-
         .history-list li {
             padding: 7px 12px;
             background: #f7f5ff;
@@ -320,19 +391,16 @@
             font-size: 0.88rem;
             color: #4a5568;
         }
-
-        .history-empty {
-            color: #a0aec0;
-            font-size: 0.9rem;
-            text-align: center;
-            padding: 10px;
+        .history-list li.chosen-history {
+            background: #fffff0;
+            border-left-color: #f6e05e;
         }
+        .history-empty { color:#a0aec0; font-size:0.9rem; text-align:center; padding:10px; }
 
         /* ── Toast ── */
         .toast {
             position: fixed;
-            bottom: 30px;
-            left: 50%;
+            bottom: 30px; left: 50%;
             transform: translateX(-50%) translateY(80px);
             background: #2d3748;
             color: white;
@@ -344,10 +412,21 @@
             z-index: 9999;
             pointer-events: none;
         }
+        .toast.show { opacity:1; transform: translateX(-50%) translateY(0); }
 
-        .toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
+        /* ── Storage info ── */
+        .storage-info {
+            font-size: 0.8rem;
+            color: #a0aec0;
+            text-align: right;
+            margin-top: 8px;
+        }
+        .storage-dot {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #48bb78;
+            margin-right: 4px;
         }
 
         /* ── Responsive ── */
@@ -357,6 +436,9 @@
             .result-box { margin: 0 16px 20px; }
             .header h1 { font-size: 1.5rem; }
             .days-input { width: 62px; }
+            .slot-machine { padding: 30px 30px; min-width: 280px; }
+            .slot-display { font-size: 1.5rem; }
+            .chosen-name { font-size: 2.5rem; }
         }
     </style>
 </head>
@@ -405,12 +487,18 @@
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
+        <div class="storage-info">
+            <span class="storage-dot"></span>人員資料已自動儲存於瀏覽器
+            <button class="btn btn-danger btn-sm" style="margin-left:10px"
+                    onclick="clearStorage()">清除儲存資料</button>
+        </div>
     </div>
 
     <!-- 操作按鈕 -->
     <div class="actions">
         <button class="btn btn-success" onclick="updateProbability()">🔄 更新機率預覽</button>
         <button class="btn btn-warning" onclick="drawLottery()">🎲 開始抽籤</button>
+        <button class="btn btn-info btn-sm" onclick="saveData()">💾 儲存資料</button>
         <button class="btn btn-danger btn-sm" onclick="clearHistory()">🗑 清除紀錄</button>
     </div>
 
@@ -429,227 +517,234 @@
 
 </div>
 
-<!-- Toast 提示 -->
+<!-- Draw Overlay（捲動抽籤動畫） -->
+<div id="drawOverlay">
+    <div class="slot-machine">
+        <div class="slot-title">▶ 抽 籤 進 行 中 ◀</div>
+        <div class="slot-display" id="slotDisplay">???</div>
+        <div class="slot-dots" id="slotDots">
+            <div class="dot" id="dot0"></div>
+            <div class="dot" id="dot1"></div>
+            <div class="dot" id="dot2"></div>
+            <div class="dot" id="dot3"></div>
+            <div class="dot" id="dot4"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Chosen Overlay（天選之人特效） -->
+<div id="chosenOverlay">
+    <canvas id="confettiCanvas"></canvas>
+    <div class="chosen-bg"></div>
+    <div class="chosen-content">
+        <div class="chosen-crown">👑</div>
+        <div class="chosen-title">✦ 天 選 之 人 ✦</div>
+        <div class="chosen-name" id="chosenName"></div>
+        <div class="chosen-subtitle" id="chosenSubtitle"></div>
+        <button class="chosen-close-btn" onclick="closeChosen()">確認知悉</button>
+    </div>
+</div>
+
+<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
-    /* ════════════════════════════════
-       資料初始化
-    ════════════════════════════════ */
-    let history = [];
+/* ═══════════════════════════════════════
+   常數 & 狀態
+═══════════════════════════════════════ */
+const STORAGE_KEY_PEOPLE  = 'lottery_people';
+const STORAGE_KEY_HISTORY = 'lottery_history';
+const STORAGE_KEY_SETTINGS = 'lottery_settings';
 
-    // 頁面載入後建立預設表格
-    window.onload = () => updateTable();
+let history = loadHistory();
+let confettiAnimId = null;
 
-    /* ════════════════════════════════
-       建立 / 更新表格
-    ════════════════════════════════ */
-    function updateTable() {
-        const count       = getClampedInt('peopleCount', 1, 10, 5);
-        const workingDays = getClampedInt('workingDays', 18, 24, 22);
-        const tbody       = document.getElementById('tableBody');
+/* ═══════════════════════════════════════
+   頁面初始化
+═══════════════════════════════════════ */
+window.onload = () => {
+    loadSettings();
+    updateTable(true);  // true = 從 localStorage 載入人員
+    renderHistory();
+};
 
-        // 保留已輸入的資料
-        const oldData = getTableData();
+/* ═══════════════════════════════════════
+   設定存取
+═══════════════════════════════════════ */
+function loadSettings() {
+    try {
+        const s = JSON.parse(localStorage.getItem(STORAGE_KEY_SETTINGS));
+        if (!s) return;
+        if (s.peopleCount) document.getElementById('peopleCount').value = s.peopleCount;
+        if (s.workingDays) document.getElementById('workingDays').value = s.workingDays;
+    } catch(e) {}
+}
 
-        tbody.innerHTML = '';
+function saveSettings() {
+    localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify({
+        peopleCount: document.getElementById('peopleCount').value,
+        workingDays: document.getElementById('workingDays').value,
+    }));
+}
 
-        for (let i = 0; i < count; i++) {
-            const prev  = oldData[i] || { name: `人員${i + 1}`, m1: 0, m2: 0 };
-            const tr    = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${i + 1}</td>
-                <td><input class="name-input" type="text"
-                           id="name_${i}" value="${prev.name}"></td>
-                <td><input class="days-input" type="number"
-                           id="m1_${i}" value="${prev.m1}"
-                           min="0" max="${workingDays}"
-                           onchange="updateProbability()"></td>
-                <td><input class="days-input" type="number"
-                           id="m2_${i}" value="${prev.m2}"
-                           min="0" max="${workingDays}"
-                           onchange="updateProbability()"></td>
-                <td class="prob-cell" id="prob_${i}">
-                    <div class="prob-text">－</div>
-                    <div class="prob-bar-bg">
-                        <div class="prob-bar-fill" style="width:0%"></div>
-                    </div>
-                </td>`;
-            tbody.appendChild(tr);
+/* ═══════════════════════════════════════
+   人員資料 localStorage
+═══════════════════════════════════════ */
+function loadPeopleData() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY_PEOPLE)) || [];
+    } catch(e) { return []; }
+}
+
+function savePeopleToStorage() {
+    const data = getTableData();
+    localStorage.setItem(STORAGE_KEY_PEOPLE, JSON.stringify(data));
+}
+
+function saveData() {
+    savePeopleToStorage();
+    saveSettings();
+    showToast('💾 資料已儲存！');
+}
+
+function clearStorage() {
+    if (!confirm('確定要清除所有儲存的人員資料？')) return;
+    localStorage.removeItem(STORAGE_KEY_PEOPLE);
+    localStorage.removeItem(STORAGE_KEY_SETTINGS);
+    showToast('已清除儲存資料');
+}
+
+/* ═══════════════════════════════════════
+   歷史紀錄 localStorage
+═══════════════════════════════════════ */
+function loadHistory() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY)) || [];
+    } catch(e) { return []; }
+}
+
+function saveHistoryToStorage() {
+    localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(history));
+}
+
+/* ═══════════════════════════════════════
+   建立 / 更新表格
+═══════════════════════════════════════ */
+function updateTable(fromStorage = false) {
+    const count       = getClampedInt('peopleCount', 1, 10, 5);
+    const workingDays = getClampedInt('workingDays', 18, 24, 22);
+    const tbody       = document.getElementById('tableBody');
+
+    // 優先：localStorage → 已輸入 → 預設
+    let savedData = fromStorage ? loadPeopleData() : [];
+    if (!fromStorage || savedData.length === 0) savedData = getTableData();
+
+    tbody.innerHTML = '';
+
+    for (let i = 0; i < count; i++) {
+        const prev = savedData[i] || { name: `人員\${i + 1}`, m1: 0, m2: 0 };
+        const tr   = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${i + 1}</td>
+            <td><input class="name-input" type="text"
+                       id="name_${i}" value="${escHtml(String(prev.name))}"
+                       onblur="autoSave()"></td>
+            <td><input class="days-input" type="number"
+                       id="m1_${i}" value="${prev.m1}"
+                       min="0" max="${workingDays}"
+                       onchange="updateProbability(); autoSave()"></td>
+            <td><input class="days-input" type="number"
+                       id="m2_${i}" value="${prev.m2}"
+                       min="0" max="${workingDays}"
+                       onchange="updateProbability(); autoSave()"></td>
+            <td class="prob-cell" id="prob_${i}">
+                <div class="prob-text">－</div>
+                <div class="prob-bar-bg">
+                    <div class="prob-bar-fill" style="width:0%"></div>
+                </div>
+            </td>`;
+        tbody.appendChild(tr);
+    }
+
+    updateProbability();
+    saveSettings();
+}
+
+/* 自動存檔（低頻） */
+let autoSaveTimer = null;
+function autoSave() {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => { savePeopleToStorage(); }, 800);
+}
+
+/* ═══════════════════════════════════════
+   讀取表格資料
+═══════════════════════════════════════ */
+function getTableData() {
+    const data  = [];
+    const rows  = document.getElementById('tableBody').querySelectorAll('tr');
+    rows.forEach((_, i) => {
+        const nameEl = document.getElementById(`name_\${i}`);
+        const m1El   = document.getElementById(`m1_\${i}`);
+        const m2El   = document.getElementById(`m2_\${i}`);
+        if (nameEl) {
+            data.push({
+                name : nameEl.value.trim() || `人員\${i + 1}`,
+                m1   : Math.max(0, parseInt(m1El.value) || 0),
+                m2   : Math.max(0, parseInt(m2El.value) || 0),
+            });
         }
+    });
+    return data;
+}
 
-        updateProbability();
-    }
+/* ═══════════════════════════════════════
+   權重計算（強化出差天數影響）
+═══════════════════════════════════════ */
+function calcWeights(data, workingDays) {
+    const maxDays = workingDays * 2;
 
-    /* ════════════════════════════════
-       讀取表格資料
-    ════════════════════════════════ */
-    function getTableData() {
-        const data  = [];
-        const tbody = document.getElementById('tableBody');
-        const rows  = tbody.querySelectorAll('tr');
-        rows.forEach((_, i) => {
-            const nameEl = document.getElementById(`name_${i}`);
-            const m1El   = document.getElementById(`m1_${i}`);
-            const m2El   = document.getElementById(`m2_${i}`);
-            if (nameEl) {
-                data.push({
-                    name : nameEl.value.trim() || `人員${i + 1}`,
-                    m1   : parseInt(m1El.value) || 0,
-                    m2   : parseInt(m2El.value) || 0,
-                });
-            }
-        });
-        return data;
-    }
+    return data.map(p => {
+        const total = p.m1 + p.m2;
+        // 強化：用平方根反比讓差距更大
+        // 基礎剩餘天數
+        const remaining = Math.max(0, maxDays - total);
+        // 權重 = remaining^1.8 → 出差多的人懲罰更重
+        const weight = Math.pow(remaining + 1, 1.8);
+        return Math.max(0.1, weight);
+    });
+}
 
-    /* ════════════════════════════════
-       計算權重
-    ════════════════════════════════ */
-    function calcWeights(data, workingDays) {
-        return data.map(p => {
-            const total     = p.m1 + p.m2;
-            const maxDays   = workingDays * 2;
-            const remaining = maxDays - total;
-            return Math.max(1, remaining);   // 最低權重為 1
-        });
-    }
+/* ═══════════════════════════════════════
+   更新機率顯示
+═══════════════════════════════════════ */
+function updateProbability() {
+    const workingDays = getClampedInt('workingDays', 18, 24, 22);
+    const data        = getTableData();
 
-    /* ════════════════════════════════
-       更新機率顯示
-    ════════════════════════════════ */
-    function updateProbability() {
-        const workingDays = getClampedInt('workingDays', 18, 24, 22);
-        const data        = getTableData();
+    if (!validateInput(data, workingDays)) return;
 
-        if (!validateInput(data, workingDays)) return;
+    const weights  = calcWeights(data, workingDays);
+    const totalW   = weights.reduce((a, b) => a + b, 0);
 
-        const weights    = calcWeights(data, workingDays);
-        const totalW     = weights.reduce((a, b) => a + b, 0);
+    data.forEach((p, i) => {
+        const prob = (weights[i] / totalW) * 100;
+        const cell = document.getElementById(`prob_\${i}`);
+        if (!cell) return;
 
-        data.forEach((_, i) => {
-            const prob    = (weights[i] / totalW) * 100;
-            const cell    = document.getElementById(`prob_${i}`);
-            if (!cell) return;
-            cell.querySelector('.prob-text').textContent   = `${prob.toFixed(1)} %`;
-            cell.querySelector('.prob-bar-fill').style.width = `${prob.toFixed(1)}%`;
-        });
-    }
+        const totalDays = p.m1 + p.m2;
+        const badge = totalDays > 0
+            ? `<span class="weight-badge">累計 \${totalDays} 天</span>`
+            : '';
 
-    /* ════════════════════════════════
-       抽籤
-    ════════════════════════════════ */
-    function drawLottery() {
-        const workingDays = getClampedInt('workingDays', 18, 24, 22);
-        const data        = getTableData();
+        cell.querySelector('.prob-text').innerHTML =
+            `${prob.toFixed(1)} %${badge}`;
+        cell.querySelector('.prob-bar-fill').style.width = `\${Math.min(100, prob).toFixed(1)}%`;
+    });
+}
 
-        if (!validateInput(data, workingDays)) return;
-
-        updateProbability();
-
-        const weights = calcWeights(data, workingDays);
-        const winner  = weightedRandom(data, weights);
-
-        // 顯示結果
-        const box = document.getElementById('resultBox');
-        box.classList.remove('highlight');
-        void box.offsetWidth; // reflow trigger
-        box.classList.add('highlight');
-
-        const totalDays = winner.m1 + winner.m2;
-        box.innerHTML = `
-            <div class="result-winner">🎉 ${winner.name} 🎉</div>
-            <div class="result-detail">
-                近兩個月長差：${winner.m1} + ${winner.m2} = ${totalDays} 天
-            </div>`;
-
-        // 加入歷史
-        addHistory(winner, totalDays);
-
-        showToast(`抽籤完成！中籤：${winner.name}`);
-    }
-
-    /* ════════════════════════════════
-       加權隨機
-    ════════════════════════════════ */
-    function weightedRandom(data, weights) {
-        const totalW = weights.reduce((a, b) => a + b, 0);
-        let rand     = Math.random() * totalW;
-        for (let i = 0; i < data.length; i++) {
-            rand -= weights[i];
-            if (rand <= 0) return data[i];
-        }
-        return data[data.length - 1];
-    }
-
-    /* ════════════════════════════════
-       歷史紀錄
-    ════════════════════════════════ */
-    function addHistory(winner, totalDays) {
-        const now    = new Date();
-        const timeStr = `${now.getMonth() + 1}/${now.getDate()} ` +
-                        `${String(now.getHours()).padStart(2,'0')}:` +
-                        `${String(now.getMinutes()).padStart(2,'0')}`;
-
-        history.unshift({ name: winner.name, days: totalDays, time: timeStr });
-
-        renderHistory();
-    }
-
-    function renderHistory() {
-        const ul = document.getElementById('historyList');
-        if (history.length === 0) {
-            ul.innerHTML = '<li class="history-empty">尚無紀錄</li>';
-            return;
-        }
-        ul.innerHTML = history.map((h, idx) =>
-            `<li>
-                <strong>#${idx + 1}</strong>&nbsp;
-                ${h.time} ｜ 🎯 <strong>${h.name}</strong>
-                （近兩月長差 ${h.days} 天）
-            </li>`
-        ).join('');
-    }
-
-    function clearHistory() {
-        history = [];
-        renderHistory();
-        showToast('歷史紀錄已清除');
-    }
-
-    /* ════════════════════════════════
-       輸入驗證
-    ════════════════════════════════ */
-    function validateInput(data, workingDays) {
-        for (const p of data) {
-            if (p.m1 < 0 || p.m2 < 0) {
-                showToast('⚠️ 長差天數不可為負數！', true);
-                return false;
-            }
-            if (p.m1 > workingDays || p.m2 > workingDays) {
-                showToast(`⚠️ ${p.name} 長差天數超過工作天數 ${workingDays} 天！`, true);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /* ════════════════════════════════
-       工具函式
-    ════════════════════════════════ */
-    function getClampedInt(id, min, max, def) {
-        const v = parseInt(document.getElementById(id).value);
-        if (isNaN(v)) return def;
-        return Math.min(max, Math.max(min, v));
-    }
-
-    function showToast(msg, isError = false) {
-        const t = document.getElementById('toast');
-        t.textContent     = msg;
-        t.style.background = isError ? '#e53e3e' : '#2d3748';
-        t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 2500);
-    }
-</script>
-</body>
-</html>
+/* ═══════════════════════════════════════
+   抽籤主流程
+═══════════════════════════════════════ */
+function drawLottery() {
+    const workingD
