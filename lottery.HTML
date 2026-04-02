@@ -1,505 +1,467 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎲 長差抽籤程式</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh; padding: 20px;
-        }
-        .container {
-            max-width: 820px; margin: 0 auto; background: #fff;
-            border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden;
-        }
-        .header {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            padding: 30px; text-align: center; color: white;
-        }
-        .header h1 { font-size: 2rem; letter-spacing: 2px; margin-bottom: 6px; }
-        .header p  { font-size: 0.95rem; opacity: 0.85; }
-        .section { padding: 24px 30px; border-bottom: 1px solid #e8edf2; }
-        .section:last-child { border-bottom: none; }
-        .section-title {
-            font-size: 1.05rem; font-weight: bold; color: #4a5568;
-            margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
-        }
-        .section-title::before {
-            content: ""; display: inline-block; width: 4px; height: 18px;
-            background: linear-gradient(#667eea, #764ba2); border-radius: 2px;
-        }
-        .btn {
-            padding: 9px 20px; border: none; border-radius: 8px;
-            font-size: 0.95rem; font-family: inherit; cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.15s; font-weight: bold; white-space: nowrap;
-        }
-        .btn:hover  { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.18); }
-        .btn:active { transform: translateY(0); }
-        .btn-success { background: linear-gradient(135deg,#48bb78,#38a169); color: white; }
-        .btn-warning { background: linear-gradient(135deg,#f6ad55,#ed8936); color: white; }
-        .btn-danger  { background: linear-gradient(135deg,#fc8181,#e53e3e); color: white; }
-        .btn-info    { background: linear-gradient(135deg,#63b3ed,#3182ce); color: white; }
-        .btn-sm      { padding: 6px 14px; font-size: 0.85rem; }
-        .btn-lg      { padding: 13px 36px; font-size: 1.1rem; }
-
-        /* 新增區 */
-        .add-area {
-            display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
-            padding: 16px; background: #faf5ff; border: 2px dashed #b794f4;
-            border-radius: 12px; margin-bottom: 16px;
-        }
-        .add-area label { font-size: 0.9rem; color: #553c9a; font-weight: bold; white-space: nowrap; }
-        #addName {
-            flex: 1; min-width: 120px; max-width: 200px; padding: 8px 12px;
-            border: 2px solid #b794f4; border-radius: 8px;
-            font-size: 0.95rem; font-family: inherit; outline: none;
-        }
-        #addName:focus { border-color: #667eea; }
-        #addDays {
-            width: 90px; padding: 8px 12px; border: 2px solid #b794f4; border-radius: 8px;
-            font-size: 0.95rem; font-family: inherit; outline: none; text-align: center;
-        }
-        #addDays:focus { border-color: #667eea; }
-
-        /* Table */
-        .table-wrapper { overflow-x: auto; border-radius: 10px; border: 1px solid #e2e8f0; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
-        thead tr { background: linear-gradient(135deg,#667eea,#764ba2); color: white; }
-        thead th { padding: 12px 14px; text-align: center; font-weight: bold; white-space: nowrap; }
-        tbody tr { transition: background 0.15s; }
-        tbody tr:nth-child(odd)  { background: #f9fafb; }
-        tbody tr:nth-child(even) { background: #ffffff; }
-        tbody tr:hover { background: #edf2ff; }
-        tbody tr.zero-row            { background: #f0fff4 !important; }
-        tbody tr.zero-row:hover      { background: #c6f6d5 !important; }
-        tbody td { padding: 10px 12px; text-align: center; vertical-align: middle; }
-        .name-input {
-            width: 100%; min-width: 90px; padding: 6px 10px;
-            border: 2px solid #e2e8f0; border-radius: 8px; font-size: 0.93rem;
-            text-align: center; outline: none; font-family: inherit;
-            transition: border-color 0.2s; background: transparent;
-        }
-        .name-input:focus { border-color: #667eea; background: white; }
-        .days-input {
-            width: 90px; padding: 6px 10px; border: 2px solid #e2e8f0; border-radius: 8px;
-            font-size: 0.95rem; text-align: center; font-weight: bold;
-            outline: none; font-family: inherit; transition: all 0.2s; background: transparent;
-        }
-        .days-zero    { border-color: #48bb78 !important; background: #f0fff4 !important; color: #276749 !important; }
-        .days-nonzero { border-color: #fc8181 !important; background: #fff5f5 !important; color: #c53030 !important; }
-        .prob-cell { min-width: 140px; }
-        .prob-bar-bg { background: #e2e8f0; border-radius: 20px; height: 10px; overflow: hidden; margin-top: 5px; }
-        .prob-bar-fill {
-            height: 10px; border-radius: 20px;
-            background: linear-gradient(90deg,#667eea,#764ba2); transition: width 0.5s ease;
-        }
-        .prob-text { font-size: 0.9rem; font-weight: bold; color: #553c9a; }
-        .badge { display: inline-block; font-size: 0.72rem; border-radius: 10px; padding: 1px 7px; margin-left: 4px; font-weight: bold; }
-        .badge-green { background: #c6f6d5; color: #276749; }
-        .badge-red   { background: #fed7e2; color: #c53030; }
-        .del-btn {
-            background: none; border: none; cursor: pointer;
-            font-size: 1.1rem; padding: 4px 8px; border-radius: 6px; transition: background 0.15s;
-        }
-        .del-btn:hover { background: #fed7e2; }
-
-        /* Actions */
-        .actions {
-            display: flex; flex-wrap: wrap; gap: 12px;
-            justify-content: center; padding: 20px 30px; border-bottom: 1px solid #e8edf2;
-        }
-
-        /* Result */
-        .result-box {
-            margin: 24px 30px; border-radius: 16px; padding: 24px; text-align: center;
-            background: #f7f5ff; border: 2px dashed #b794f4; min-height: 90px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .result-box.flash {
-            animation: rPulse 0.6s ease;
-            background: linear-gradient(135deg,#fff5f5,#fef2f2); border-color: #fc8181;
-        }
-        @keyframes rPulse { 0%{transform:scale(1)} 50%{transform:scale(1.03)} 100%{transform:scale(1)} }
-        .result-waiting { font-size: 1rem; color: #a0aec0; }
-        .result-winner  { font-size: 1.8rem; font-weight: bold; color: #e53e3e; margin-bottom: 6px; }
-        .result-detail  { font-size: 0.88rem; color: #718096; }
-
-        /* History */
-        .history-list {
-            list-style: none; display: flex; flex-direction: column;
-            gap: 6px; max-height: 200px; overflow-y: auto; padding: 4px 0;
-        }
-        .history-list li {
-            padding: 7px 12px; background: #f7f5ff;
-            border-left: 4px solid #667eea; border-radius: 0 6px 6px 0; font-size: 0.88rem; color: #4a5568;
-        }
-        .history-list li.h-chosen { background: #fffff0; border-left-color: #f6e05e; }
-        .history-empty { color: #a0aec0; font-size: 0.9rem; text-align: center; padding: 10px; }
-
-        /* Draw Overlay */
-        #drawOverlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88);
-            z-index: 1000; justify-content: center; align-items: center;
-        }
-        #drawOverlay.active { display: flex; }
-        .slot-machine {
-            background: linear-gradient(160deg,#1a1a2e,#16213e,#0f3460);
-            border: 3px solid #f6ad55; border-radius: 20px; padding: 44px 64px;
-            text-align: center; box-shadow: 0 0 80px rgba(246,173,85,0.45); min-width: 320px;
-        }
-        .slot-title { color: #f6ad55; font-size: 1.1rem; letter-spacing: 4px; margin-bottom: 28px; animation: blink 1s infinite; }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
-        .slot-display {
-            background: #050505; border: 2px solid #4a9eff; border-radius: 12px;
-            padding: 18px 30px; font-size: 2.2rem; font-weight: bold; color: #4affb4;
-            min-width: 230px; min-height: 72px; display: flex; align-items: center; justify-content: center;
-            box-shadow: inset 0 0 24px rgba(74,159,255,0.25), 0 0 24px rgba(74,255,180,0.2);
-        }
-        .slot-display.rolling { animation: colorShift 0.12s infinite; }
-        @keyframes colorShift {
-            0%{color:#4affb4} 25%{color:#f6ad55} 50%{color:#fc8181} 75%{color:#b794f4} 100%{color:#4affb4}
-        }
-        .slot-dots { margin-top: 24px; display: flex; gap: 12px; justify-content: center; }
-        .dot { width: 11px; height: 11px; border-radius: 50%; background: #2d3748; transition: all 0.3s; }
-        .dot.on { background: #f6ad55; box-shadow: 0 0 10px #f6ad55; }
-
-        /* Chosen Overlay */
-        #chosenOverlay {
-            display: none; position: fixed; inset: 0; z-index: 2000;
-            justify-content: center; align-items: center;
-        }
-        #chosenOverlay.active { display: flex; }
-        #confettiCanvas { position: fixed; inset: 0; pointer-events: none; z-index: 1999; }
-        .chosen-bg {
-            position: absolute; inset: 0;
-            background: radial-gradient(circle, rgba(255,215,0,0.18) 0%, rgba(0,0,0,0.93) 70%);
-        }
-        .chosen-content { position: relative; text-align: center; animation: chosenPop 0.85s cubic-bezier(0.34,1.56,0.64,1); }
-        @keyframes chosenPop { 0%{transform:scale(0) rotate(-12deg);opacity:0} 100%{transform:scale(1) rotate(0);opacity:1} }
-        .chosen-crown { font-size: 5.5rem; animation: floatY 2s ease-in-out infinite; }
-        @keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-16px)} }
-        .chosen-label { font-size: 1.4rem; color: #ffd700; letter-spacing: 7px; margin: 10px 0; animation: glowT 1.5s ease-in-out infinite alternate; }
-        @keyframes glowT { from{text-shadow:0 0 10px #ffd700,0 0 20px #ffd700} to{text-shadow:0 0 25px #ffd700,0 0 50px #ff8c00,0 0 75px #ff4500} }
-        .chosen-name { font-size: 3.8rem; font-weight: bold; color: #fff; text-shadow: 0 0 30px #ffd700, 0 0 60px #ffd700; margin: 10px 0; }
-        .chosen-sub  { font-size: 1rem; color: #ffd700; opacity: 0.8; letter-spacing: 2px; }
-        .chosen-prob { font-size: 0.9rem; color: #ffd700; opacity: 0.65; margin-top: 8px; }
-        .chosen-btn {
-            margin-top: 32px; padding: 13px 44px;
-            background: linear-gradient(135deg,#ffd700,#ff8c00); border: none; border-radius: 30px;
-            font-size: 1.05rem; font-weight: bold; color: #1a1a1a;
-            cursor: pointer; font-family: inherit; transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .chosen-btn:hover { transform: scale(1.06); box-shadow: 0 0 24px rgba(255,215,0,0.65); }
-
-        /* Toast */
-        .toast {
-            position: fixed; bottom: 30px; left: 50%;
-            transform: translateX(-50%) translateY(80px);
-            background: #2d3748; color: white; padding: 12px 26px; border-radius: 30px;
-            font-size: 0.93rem; opacity: 0; transition: all 0.35s ease;
-            z-index: 9999; pointer-events: none; white-space: nowrap;
-        }
-        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-        .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; font-size: 0.82rem; color: #718096; }
-        .legend-item { display: flex; align-items: center; gap: 5px; }
-        .legend-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-
-        @media(max-width:600px){
-            .section{padding:18px 16px;} .actions{padding:14px;}
-            .result-box{margin:16px;} .header h1{font-size:1.5rem;}
-            .slot-machine{padding:32px 28px;min-width:270px;}
-            .slot-display{font-size:1.6rem;} .chosen-name{font-size:2.6rem;}
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎲 長差抽籤程式</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Microsoft JhengHei",sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;padding:20px}
+.container{max-width:820px;margin:0 auto;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden}
+.header{background:linear-gradient(135deg,#667eea,#764ba2);padding:30px;text-align:center;color:#fff}
+.header h1{font-size:2rem;letter-spacing:2px;margin-bottom:6px}
+.header p{font-size:.95rem;opacity:.85}
+.section{padding:24px 30px;border-bottom:1px solid #e8edf2}
+.section:last-child{border-bottom:none}
+.sec-title{font-size:1.05rem;font-weight:700;color:#4a5568;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.sec-title::before{content:"";display:inline-block;width:4px;height:18px;background:linear-gradient(#667eea,#764ba2);border-radius:2px}
+.btn{padding:9px 20px;border:none;border-radius:8px;font-size:.95rem;font-family:inherit;cursor:pointer;font-weight:700;white-space:nowrap;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.18)}
+.btn:active{transform:translateY(0)}
+.btn-success{background:linear-gradient(135deg,#48bb78,#38a169);color:#fff}
+.btn-warning{background:linear-gradient(135deg,#f6ad55,#ed8936);color:#fff}
+.btn-danger{background:linear-gradient(135deg,#fc8181,#e53e3e);color:#fff}
+.btn-info{background:linear-gradient(135deg,#63b3ed,#3182ce);color:#fff}
+.btn-sm{padding:6px 14px;font-size:.85rem}
+.btn-lg{padding:13px 36px;font-size:1.1rem}
+.add-area{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:16px;background:#faf5ff;border:2px dashed #b794f4;border-radius:12px;margin-bottom:16px}
+.add-area label{font-size:.9rem;color:#553c9a;font-weight:700;white-space:nowrap}
+.add-area input[type=text]{flex:1;min-width:120px;max-width:200px;padding:8px 12px;border:2px solid #b794f4;border-radius:8px;font-size:.95rem;font-family:inherit;outline:none}
+.add-area input[type=text]:focus{border-color:#667eea}
+.add-area input[type=number]{width:90px;padding:8px 12px;border:2px solid #b794f4;border-radius:8px;font-size:.95rem;font-family:inherit;outline:none;text-align:center}
+.add-area input[type=number]:focus{border-color:#667eea}
+.table-wrap{overflow-x:auto;border-radius:10px;border:1px solid #e2e8f0}
+table{width:100%;border-collapse:collapse;font-size:.93rem}
+thead tr{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
+thead th{padding:12px 14px;text-align:center;font-weight:700;white-space:nowrap}
+tbody tr{transition:background .15s}
+tbody tr:nth-child(odd){background:#f9fafb}
+tbody tr:nth-child(even){background:#fff}
+tbody tr:hover{background:#edf2ff}
+tbody tr.zero-row{background:#f0fff4!important}
+tbody tr.zero-row:hover{background:#c6f6d5!important}
+tbody td{padding:10px 12px;text-align:center;vertical-align:middle}
+.name-inp{width:100%;min-width:90px;padding:6px 10px;border:2px solid #e2e8f0;border-radius:8px;font-size:.93rem;text-align:center;outline:none;font-family:inherit;transition:border-color .2s;background:transparent}
+.name-inp:focus{border-color:#667eea;background:#fff}
+.days-inp{width:90px;padding:6px 10px;border:2px solid #e2e8f0;border-radius:8px;font-size:.95rem;text-align:center;font-weight:700;outline:none;font-family:inherit;transition:all .2s;background:transparent}
+.d-zero{border-color:#48bb78!important;background:#f0fff4!important;color:#276749!important}
+.d-nonz{border-color:#fc8181!important;background:#fff5f5!important;color:#c53030!important}
+.prob-cell{min-width:140px}
+.prob-bar-bg{background:#e2e8f0;border-radius:20px;height:10px;overflow:hidden;margin-top:5px}
+.prob-bar-fill{height:10px;border-radius:20px;background:linear-gradient(90deg,#667eea,#764ba2);transition:width .5s ease}
+.prob-text{font-size:.9rem;font-weight:700;color:#553c9a}
+.badge{display:inline-block;font-size:.72rem;border-radius:10px;padding:1px 7px;margin-left:4px;font-weight:700}
+.bg{background:#c6f6d5;color:#276749}
+.br{background:#fed7e2;color:#c53030}
+.del-btn{background:none;border:none;cursor:pointer;font-size:1.1rem;padding:4px 8px;border-radius:6px;transition:background .15s}
+.del-btn:hover{background:#fed7e2}
+.actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;padding:20px 30px;border-bottom:1px solid #e8edf2}
+.result-box{margin:24px 30px;border-radius:16px;padding:24px;text-align:center;background:#f7f5ff;border:2px dashed #b794f4;min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.result-box.flash{animation:rp .6s ease;background:linear-gradient(135deg,#fff5f5,#fef2f2);border-color:#fc8181}
+@keyframes rp{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
+.r-wait{font-size:1rem;color:#a0aec0}
+.r-win{font-size:1.8rem;font-weight:700;color:#e53e3e;margin-bottom:6px}
+.r-det{font-size:.88rem;color:#718096}
+.hist-list{list-style:none;display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;padding:4px 0}
+.hist-list li{padding:7px 12px;background:#f7f5ff;border-left:4px solid #667eea;border-radius:0 6px 6px 0;font-size:.88rem;color:#4a5568}
+.hist-list li.hc{background:#fffff0;border-left-color:#f6e05e}
+.hist-empty{color:#a0aec0;font-size:.9rem;text-align:center;padding:10px}
+#drawOv{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:1000;justify-content:center;align-items:center}
+#drawOv.active{display:flex}
+.slot-box{background:linear-gradient(160deg,#1a1a2e,#16213e,#0f3460);border:3px solid #f6ad55;border-radius:20px;padding:44px 64px;text-align:center;box-shadow:0 0 80px rgba(246,173,85,.45);min-width:320px}
+.slot-title{color:#f6ad55;font-size:1.1rem;letter-spacing:4px;margin-bottom:28px;animation:bl 1s infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.35}}
+.slot-disp{background:#050505;border:2px solid #4a9eff;border-radius:12px;padding:18px 30px;font-size:2.2rem;font-weight:700;color:#4affb4;min-width:230px;min-height:72px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 24px rgba(74,159,255,.25),0 0 24px rgba(74,255,180,.2)}
+.slot-disp.rolling{animation:cs .12s infinite}
+@keyframes cs{0%{color:#4affb4}25%{color:#f6ad55}50%{color:#fc8181}75%{color:#b794f4}100%{color:#4affb4}}
+.slot-dots{margin-top:24px;display:flex;gap:12px;justify-content:center}
+.dot{width:11px;height:11px;border-radius:50%;background:#2d3748;transition:all .3s}
+.dot.on{background:#f6ad55;box-shadow:0 0 10px #f6ad55}
+#chosenOv{display:none;position:fixed;inset:0;z-index:2000;justify-content:center;align-items:center}
+#chosenOv.active{display:flex}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:1999}
+.chosen-bg{position:absolute;inset:0;background:radial-gradient(circle,rgba(255,215,0,.18) 0%,rgba(0,0,0,.93) 70%)}
+.chosen-c{position:relative;text-align:center;animation:cp .85s cubic-bezier(.34,1.56,.64,1)}
+@keyframes cp{0%{transform:scale(0) rotate(-12deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+.chosen-crown{font-size:5.5rem;animation:fy 2s ease-in-out infinite}
+@keyframes fy{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+.chosen-lbl{font-size:1.4rem;color:#ffd700;letter-spacing:7px;margin:10px 0;animation:gt 1.5s ease-in-out infinite alternate}
+@keyframes gt{from{text-shadow:0 0 10px #ffd700,0 0 20px #ffd700}to{text-shadow:0 0 25px #ffd700,0 0 50px #ff8c00,0 0 75px #ff4500}}
+.chosen-name{font-size:3.8rem;font-weight:700;color:#fff;text-shadow:0 0 30px #ffd700,0 0 60px #ffd700;margin:10px 0}
+.chosen-sub{font-size:1rem;color:#ffd700;opacity:.8;letter-spacing:2px}
+.chosen-prob{font-size:.9rem;color:#ffd700;opacity:.65;margin-top:8px}
+.chosen-btn{margin-top:32px;padding:13px 44px;background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;border-radius:30px;font-size:1.05rem;font-weight:700;color:#1a1a1a;cursor:pointer;font-family:inherit;transition:transform .2s,box-shadow .2s}
+.chosen-btn:hover{transform:scale(1.06);box-shadow:0 0 24px rgba(255,215,0,.65)}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:#2d3748;color:#fff;padding:12px 26px;border-radius:30px;font-size:.93rem;opacity:0;transition:all .35s ease;z-index:9999;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px;font-size:.82rem;color:#718096}
+.legend-item{display:flex;align-items:center;gap:5px}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+@media(max-width:600px){.section{padding:18px 16px}.actions{padding:14px}.result-box{margin:16px}.header h1{font-size:1.5rem}.slot-box{padding:32px 28px;min-width:270px}.slot-disp{font-size:1.6rem}.chosen-name{font-size:2.6rem}}
+</style>
 </head>
 <body>
 <div class="container">
-    <div class="header">
-        <h1>🎲 長差抽籤程式</h1>
-        <p>出差天數越多，抽中機率越低 ／ 零天數者大幅加權</p>
-    </div>
+  <div class="header">
+    <h1>🎲 長差抽籤程式</h1>
+    <p>出差天數越多，抽中機率越低 ／ 零天數者大幅加權</p>
+  </div>
 
-    <div class="section">
-        <div class="section-title">人員管理</div>
-        <div class="add-area">
-            <label>➕ 新增人員</label>
-            <input type="text"   id="addName" placeholder="輸入姓名" maxlength="20">
-            <input type="number" id="addDays" placeholder="天數" min="0" max="999" value="0">
-            <button class="btn btn-success" onclick="addPerson()">＋ 新增</button>
-        </div>
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width:40px">#</th>
-                        <th>姓名</th>
-                        <th>長差天數（近兩月合計）</th>
-                        <th>抽中機率</th>
-                        <th style="width:50px">移除</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
-        <div class="legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#48bb78"></div><span>0 天 → 最高加權</span></div>
-            <div class="legend-item"><div class="legend-dot" style="background:#f6ad55"></div><span>天數越多 → 指數懲罰越重</span></div>
-            <div class="legend-item"><div class="legend-dot" style="background:#e53e3e"></div><span>機率 &lt; 10% → 天選之人特效</span></div>
-        </div>
+  <div class="section">
+    <div class="sec-title">人員管理</div>
+    <div class="add-area">
+      <label>➕ 新增人員</label>
+      <input type="text"   id="addName" placeholder="輸入姓名" maxlength="20">
+      <input type="number" id="addDays" placeholder="天數" min="0" max="999" value="0">
+      <button class="btn btn-success" id="addBtn">＋ 新增</button>
     </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:40px">#</th>
+            <th>姓名</th>
+            <th>長差天數（近兩月合計）</th>
+            <th>抽中機率</th>
+            <th style="width:50px">移除</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#48bb78"></div><span>0 天 → 最高加權</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f6ad55"></div><span>天數越多 → 指數懲罰越重</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e53e3e"></div><span>機率 &lt;10% → 天選之人特效</span></div>
+    </div>
+  </div>
 
-    <div class="actions">
-        <button class="btn btn-success" onclick="renderTable()">🔄 更新機率</button>
-        <button class="btn btn-warning btn-lg" onclick="drawLottery()">🎲 開始抽籤</button>
-        <button class="btn btn-info btn-sm" onclick="saveData()">💾 儲存人員</button>
-        <button class="btn btn-danger btn-sm" onclick="clearHistory()">🗑 清除紀錄</button>
-    </div>
+  <div class="actions">
+    <button class="btn btn-success" id="refreshBtn">🔄 更新機率</button>
+    <button class="btn btn-warning btn-lg" id="drawBtn">🎲 開始抽籤</button>
+    <button class="btn btn-info btn-sm" id="saveBtn">💾 儲存人員</button>
+    <button class="btn btn-danger btn-sm" id="clearHistBtn">🗑 清除紀錄</button>
+  </div>
 
-    <div class="result-box" id="resultBox">
-        <div class="result-waiting">尚未抽籤，請先新增人員再按「開始抽籤」</div>
-    </div>
+  <div class="result-box" id="resultBox">
+    <div class="r-wait">尚未抽籤，請先新增人員再按「開始抽籤」</div>
+  </div>
 
-    <div class="section">
-        <div class="section-title">抽籤歷史紀錄</div>
-        <ul class="history-list" id="historyList">
-            <li class="history-empty">尚無紀錄</li>
-        </ul>
-    </div>
+  <div class="section">
+    <div class="sec-title">抽籤歷史紀錄</div>
+    <ul class="hist-list" id="histList">
+      <li class="hist-empty">尚無紀錄</li>
+    </ul>
+  </div>
 </div>
 
-<!-- Draw Overlay -->
-<div id="drawOverlay">
-    <div class="slot-machine">
-        <div class="slot-title">▶ 抽 籤 進 行 中 ◀</div>
-        <div class="slot-display" id="slotDisplay">???</div>
-        <div class="slot-dots">
-            <div class="dot" id="d0"></div><div class="dot" id="d1"></div>
-            <div class="dot" id="d2"></div><div class="dot" id="d3"></div>
-            <div class="dot" id="d4"></div>
-        </div>
+<div id="drawOv">
+  <div class="slot-box">
+    <div class="slot-title">▶ 抽 籤 進 行 中 ◀</div>
+    <div class="slot-disp" id="slotDisp">???</div>
+    <div class="slot-dots">
+      <div class="dot" id="d0"></div><div class="dot" id="d1"></div>
+      <div class="dot" id="d2"></div><div class="dot" id="d3"></div>
+      <div class="dot" id="d4"></div>
     </div>
+  </div>
 </div>
 
-<!-- Chosen Overlay -->
-<div id="chosenOverlay">
-    <canvas id="confettiCanvas"></canvas>
-    <div class="chosen-bg"></div>
-    <div class="chosen-content">
-        <div class="chosen-crown">👑</div>
-        <div class="chosen-label">✦ 天 選 之 人 ✦</div>
-        <div class="chosen-name" id="chosenName"></div>
-        <div class="chosen-sub"  id="chosenSub"></div>
-        <div class="chosen-prob" id="chosenProb"></div>
-        <button class="chosen-btn" onclick="closeChosen()">我認命了 🫡</button>
-    </div>
+<div id="chosenOv">
+  <canvas id="confetti"></canvas>
+  <div class="chosen-bg"></div>
+  <div class="chosen-c">
+    <div class="chosen-crown">👑</div>
+    <div class="chosen-lbl">✦ 天 選 之 人 ✦</div>
+    <div class="chosen-name" id="chosenName"></div>
+    <div class="chosen-sub"  id="chosenSub"></div>
+    <div class="chosen-prob" id="chosenProb"></div>
+    <button class="chosen-btn" id="chosenCloseBtn">我認命了 🫡</button>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-/* =============================================
-   所有函式全部在全域 scope 定義
-   不放在任何 function / event 裡面
-   ============================================= */
+// =============================================
+// 全域變數
+// =============================================
+var SK_P = 'lp_people_v5';
+var SK_H = 'lp_history_v5';
+var BASE = 10000;
+var PWR  = 3;
+var ppl  = [];
+var hist = [];
+var cId  = null;
 
-var SK_PEOPLE  = 'lotto_people_v4';
-var SK_HISTORY = 'lotto_history_v4';
-var BASE_ZERO  = 10000;
-var POWER      = 3;
+// =============================================
+// 工具函式
+// =============================================
+function safeLoad(key) {
+    try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
+}
+function safeSave(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
+function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function showToast(msg, isWarn) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = isWarn ? '#c53030' : '#2d3748';
+    t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
 
-var people     = [];
-var lotteryHistory = [];
-var confettiId = null;
+// =============================================
+// 權重計算
+// =============================================
+function calcWeights(data) {
+    var w = [];
+    for (var i = 0; i < data.length; i++) {
+        w.push(data[i].days === 0 ? BASE : BASE / Math.pow(data[i].days, PWR));
+    }
+    return w;
+}
+function totalWeight(w) {
+    var t = 0; for (var i=0;i<w.length;i++) t+=w[i]; return t;
+}
+function weightedRandom(w) {
+    var tw = totalWeight(w);
+    var r  = Math.random() * tw;
+    for (var i=0;i<w.length;i++) { r -= w[i]; if (r<=0) return i; }
+    return w.length - 1;
+}
 
-/* ── 啟動 ── */
-window.onload = function() {
-    people         = safeLoad(SK_PEOPLE)  || [];
-    lotteryHistory = safeLoad(SK_HISTORY) || [];
+// =============================================
+// 渲染表格
+// =============================================
+function renderTable() {
+    var tbody = document.getElementById('tbody');
+    tbody.innerHTML = '';
 
-    var nameEl = document.getElementById('addName');
-    var daysEl = document.getElementById('addDays');
+    if (ppl.length === 0) {
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="5" style="padding:20px;color:#a0aec0;font-size:.9rem">尚無人員，請在上方輸入姓名與天數後按「＋ 新增」</td>';
+        tbody.appendChild(tr);
+        return;
+    }
 
-    nameEl.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') daysEl.focus();
-    });
-    daysEl.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') addPerson();
-    });
+    var w  = calcWeights(ppl);
+    var tw = totalWeight(w);
 
-    renderTable();
-    renderHistory();
-};
+    for (var i = 0; i < ppl.length; i++) {
+        (function(idx){
+            var p    = ppl[idx];
+            var prob = (w[idx] / tw) * 100;
+            var tr   = document.createElement('tr');
+            if (p.days === 0) tr.className = 'zero-row';
 
-/* ── 新增人員 ── */
+            var badge = '';
+            if (p.days === 0)   badge = '<span class="badge bg">🔝 最高加權</span>';
+            else if (prob < 10) badge = '<span class="badge br">⚠ 低機率</span>';
+
+            tr.innerHTML =
+                '<td style="color:#a0aec0">'+(idx+1)+'</td>'+
+                '<td><input class="name-inp" type="text" value="'+escHtml(p.name)+'" id="ni'+idx+'"></td>'+
+                '<td><input class="days-inp '+(p.days===0?'d-zero':'d-nonz')+'" type="number" value="'+p.days+'" min="0" max="999" id="di'+idx+'"></td>'+
+                '<td class="prob-cell" id="pc'+idx+'">'+
+                  '<div class="prob-text">'+prob.toFixed(1)+'%'+badge+'</div>'+
+                  '<div class="prob-bar-bg"><div class="prob-bar-fill" style="width:'+Math.min(100,prob).toFixed(1)+'%"></div></div>'+
+                '</td>'+
+                '<td><button class="del-btn" id="db'+idx+'">🗑</button></td>';
+
+            tbody.appendChild(tr);
+
+            // 綁定事件（避免 onclick 字串的 scope 問題）
+            document.getElementById('ni'+idx).addEventListener('change', function(){
+                ppl[idx].name = this.value.trim() || ('人員'+(idx+1));
+            });
+            document.getElementById('di'+idx).addEventListener('input', function(){
+                var d = Math.max(0, parseInt(this.value)||0);
+                ppl[idx].days = d;
+                this.className = 'days-inp '+(d===0?'d-zero':'d-nonz');
+                var row = this.closest('tr');
+                if (row) row.className = d===0?'zero-row':'';
+                refreshProbs();
+            });
+            document.getElementById('db'+idx).addEventListener('click', function(){
+                var name = ppl[idx].name;
+                if (!confirm('確定要移除「'+name+'」？')) return;
+                ppl.splice(idx, 1);
+                renderTable();
+                showToast('🗑 已移除「'+name+'」');
+            });
+        })(i);
+    }
+}
+
+// =============================================
+// 只刷新機率欄
+// =============================================
+function refreshProbs() {
+    if (ppl.length === 0) return;
+    var w  = calcWeights(ppl);
+    var tw = totalWeight(w);
+    for (var i = 0; i < ppl.length; i++) {
+        var cell = document.getElementById('pc'+i);
+        if (!cell) continue;
+        var prob  = (w[i]/tw)*100;
+        var badge = '';
+        if (ppl[i].days === 0)  badge = '<span class="badge bg">🔝 最高加權</span>';
+        else if (prob < 10)      badge = '<span class="badge br">⚠ 低機率</span>';
+        cell.querySelector('.prob-text').innerHTML       = prob.toFixed(1)+'%'+badge;
+        cell.querySelector('.prob-bar-fill').style.width = Math.min(100,prob).toFixed(1)+'%';
+    }
+}
+
+// =============================================
+// 新增人員
+// =============================================
 function addPerson() {
     var nameEl = document.getElementById('addName');
     var daysEl = document.getElementById('addDays');
-    var name   = nameEl.value.trim();
-    var days   = Math.max(0, parseInt(daysEl.value) || 0);
+    if (!nameEl || !daysEl) { showToast('⚠ 找不到輸入欄位', true); return; }
 
-    if (!name) {
-        showToast('⚠ 請輸入姓名', true);
-        nameEl.focus();
-        return;
+    var name = nameEl.value.trim();
+    var days = Math.max(0, parseInt(daysEl.value)||0);
+
+    if (!name) { showToast('⚠ 請輸入姓名', true); nameEl.focus(); return; }
+
+    for (var i = 0; i < ppl.length; i++) {
+        if (ppl[i].name === name) { showToast('⚠ 姓名重複', true); nameEl.focus(); return; }
     }
 
-    var dup = false;
-    for (var i = 0; i < people.length; i++) {
-        if (people[i].name === name) { dup = true; break; }
-    }
-    if (dup) {
-        showToast('⚠ 姓名重複，請更換', true);
-        nameEl.focus();
-        return;
-    }
-
-    people.push({ name: name, days: days });
+    ppl.push({ name: name, days: days });
     nameEl.value = '';
     daysEl.value = '0';
     nameEl.focus();
     renderTable();
-    showToast('✅ 已新增「' + name + '」');
+    showToast('✅ 已新增「'+name+'」');
 }
 
-/* ── 刪除人員 ── */
-function deletePerson(idx) {
-    var name = people[idx].name;
-    if (!confirm('確定要移除「' + name + '」？')) return;
-    people.splice(idx, 1);
-    renderTable();
-    showToast('🗑 已移除「' + name + '」');
+// =============================================
+// 儲存 / 清除
+// =============================================
+function saveData() {
+    if (ppl.length === 0) { showToast('⚠ 尚無人員資料', true); return; }
+    safeSave(SK_P, ppl);
+    showToast('💾 已儲存 '+ppl.length+' 筆人員資料');
+}
+function clearHistory() {
+    if (!confirm('確定要清除所有抽籤紀錄？')) return;
+    hist = [];
+    safeSave(SK_H, hist);
+    renderHistory();
+    showToast('🗑 已清除紀錄');
 }
 
-/* ── 更新天數 ── */
-function updateDays(idx, val) {
-    var d = Math.max(0, parseInt(val) || 0);
-    people[idx].days = d;
-    var inp = document.getElementById('dinp_' + idx);
-    var row = document.getElementById('row_'  + idx);
-    if (inp) inp.className = 'days-input ' + (d === 0 ? 'days-zero' : 'days-nonzero');
-    if (row) row.className = (d === 0 ? 'zero-row' : '');
-    refreshProbs();
-}
-
-/* ── 更新姓名 ── */
-function updateName(idx, val) {
-    people[idx].name = val.trim() || ('人員' + (idx + 1));
-}
-
-/* ── 渲染表格 ── */
-function renderTable() {
-    var tbody = document.getElementById('tableBody');
-    tbody.innerHTML = '';
-
-    if (people.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="padding:20px;color:#a0aec0;font-size:0.9rem">尚無人員，請在上方輸入姓名與天數後按「＋ 新增」</td></tr>';
+// =============================================
+// 歷史紀錄
+// =============================================
+function renderHistory() {
+    var ul = document.getElementById('histList');
+    ul.innerHTML = '';
+    if (hist.length === 0) {
+        ul.innerHTML = '<li class="hist-empty">尚無紀錄</li>';
         return;
     }
-
-    var weights = calcWeights(people);
-    var totalW  = 0;
-    for (var j = 0; j < weights.length; j++) totalW += weights[j];
-
-    for (var i = 0; i < people.length; i++) {
-        var p    = people[i];
-        var prob = (weights[i] / totalW) * 100;
-        var tr   = document.createElement('tr');
-        tr.id        = 'row_' + i;
-        tr.className = (p.days === 0 ? 'zero-row' : '');
-
-        var badge = '';
-        if (p.days === 0)   badge = '<span class="badge badge-green">🔝 最高加權</span>';
-        else if (prob < 10) badge = '<span class="badge badge-red">⚠ 低機率</span>';
-
-        tr.innerHTML =
-            '<td style="color:#a0aec0">' + (i + 1) + '</td>' +
-            '<td><input class="name-input" type="text" value="' + esc(p.name) + '" onblur="updateName(' + i + ',this.value)"></td>' +
-            '<td><input id="dinp_' + i + '" class="days-input ' + (p.days === 0 ? 'days-zero' : 'days-nonzero') + '" type="number" value="' + p.days + '" min="0" max="999" oninput="updateDays(' + i + ',this.value)"></td>' +
-            '<td class="prob-cell" id="pc_' + i + '">' +
-              '<div class="prob-text">' + prob.toFixed(1) + '%' + badge + '</div>' +
-              '<div class="prob-bar-bg"><div class="prob-bar-fill" style="width:' + Math.min(100, prob).toFixed(1) + '%"></div></div>' +
-            '</td>' +
-            '<td><button class="del-btn" onclick="deletePerson(' + i + ')">🗑</button></td>';
-
-        tbody.appendChild(tr);
+    for (var i = hist.length-1; i >= 0; i--) {
+        var li = document.createElement('li');
+        if (hist[i].chosen) li.className = 'hc';
+        li.textContent = hist[i].text;
+        ul.appendChild(li);
     }
 }
-
-/* ── 只刷新機率欄 ── */
-function refreshProbs() {
-    if (people.length === 0) return;
-    var weights = calcWeights(people);
-    var totalW  = 0;
-    for (var j = 0; j < weights.length; j++) totalW += weights[j];
-
-    for (var i = 0; i < people.length; i++) {
-        var cell = document.getElementById('pc_' + i);
-        if (!cell) continue;
-        var prob  = (weights[i] / totalW) * 100;
-        var badge = '';
-        if (people[i].days === 0)  badge = '<span class="badge badge-green">🔝 最高加權</span>';
-        else if (prob < 10)         badge = '<span class="badge badge-red">⚠ 低機率</span>';
-        cell.querySelector('.prob-text').innerHTML    = prob.toFixed(1) + '%' + badge;
-        cell.querySelector('.prob-bar-fill').style.width = Math.min(100, prob).toFixed(1) + '%';
-    }
+function addHistory(text, chosen) {
+    hist.push({ text: text, chosen: !!chosen });
+    safeSave(SK_H, hist);
+    renderHistory();
 }
 
-/* ── 權重公式 ── */
-function calcWeights(data) {
-    var w = [];
-    for (var i = 0; i < data.length; i++) {
-        if (data[i].days === 0) {
-            w.push(BASE_ZERO);
-        } else {
-            w.push(BASE_ZERO / Math.pow(data[i].days, POWER));
-        }
-    }
-    return w;
-}
-
-/* ── 加權隨機 ── */
-function weightedRandom(weights) {
-    var totalW = 0;
-    for (var i = 0; i < weights.length; i++) totalW += weights[i];
-    var rand = Math.random() * totalW;
-    for (var i = 0; i < weights.length; i++) {
-        rand -= weights[i];
-        if (rand <= 0) return i;
-    }
-    return weights.length - 1;
-}
-
-/* ── 抽籤 ── */
+// =============================================
+// 抽籤
+// =============================================
 function drawLottery() {
-    if (people.length === 0) { showToast('⚠ 請先新增人員！', true); return; }
-    if (people.length < 2)   { showToast('⚠ 至少需要 2 位人員', true); return; }
+    if (ppl.length === 0) { showToast('⚠ 請先新增人員！', true); return; }
+    if (ppl.length < 2)   { showToast('⚠ 至少需要 2 位人員', true); return; }
 
-    var weights    = calcWeights(people);
-    var totalW     = 0;
-    for (var j = 0; j < weights.length; j++) totalW += weights[j];
-    var winIdx     = weightedRandom(weights);
-    var winner     = people[winIdx];
-    var winnerProb = (weights[winIdx] / totalW) * 100;
-    var isChosen   = winnerProb < 10;
+    var w       = calcWeights(ppl);
+    var tw      = totalWeight(w);
+    var winIdx  = weightedRandom(w);
+    var winner  = ppl[winIdx];
+    var prob    = (w[winIdx]/tw)*100;
+    var chosen  = prob < 10;
 
-    startSlot(winner, winnerProb, isChosen);
+    startSlot(winner, prob, chosen);
 }
 
-/* ── Slot 動畫 ── */
-function startSlot(winner, prob, isChosen) {
-    var overlay = document.getElementById('drawOverlay');
-    var display = document.getElementById('slotDisplay');
-    overlay.classList.add('active');
-    display.classList.add('rolling');
-    display.textContent = '???';
+// =============================================
+// Slot 動畫
+// =============================================
+function startSlot(winner, prob, chosen) {
+    var ov   = document.getElementById('drawOv');
+    var disp = document.getElementById('slotDisp');
+    var dots = [document.getElementById('d0'),document.getElementById('d1'),
+                document.getElementById('d2'),document.getElementById('d3'),
+                document.getElementById('d4')];
 
-    var dots     = [0,1,2,3,4].map(function(i){ return document.getElementById('d'+i); });
-    var duration = 3000 + Math.random() * 2000;   /* 3~5 秒 */
+    ov.classList.add('active');
+    disp.classList.add('rolling');
+    disp.textContent = '???';
+
+    var duration = 3000 + Math.random()*2000;
     var start    = Date.now();
-    var dotIdx   = 0;
-    var dotTimer = setInterval(function() {
-        dots.forEach(
+    var dotI     = 0;
+
+    var dotTimer = setInterval(function(){
+        dots.forEach(function(d){ d.classList.remove('on'); });
+        dots[dotI % 5].classList.add('on');
+        dotI++;
+    }, 300);
+
+    var nameTimer = setInterval(function(){
+        var r = Math.floor(Math.random()*ppl.length);
+        disp.textContent = ppl[r].name;
+    }, 120);
+
+    setTimeout(function(){
+        clearInterval(dotTimer);
+        clearInterval(nameTimer);
+        dots.forEach(function(d){ d.classList.remove('on'); });
+        disp.classList.remove('rolling');
+        disp.textContent = winner.name;
+        ov.classList.remove('active');
+
+        // 更新結果欄
+        var rb = document.getElementById('resultBox');
+        rb.innerHTML =
+            '<div class="r-win">🎯 '+escHtml(winner.name)+'</div>'+
+            '<div class="r-det">長差天數：'+winner.days+' 天 ／ 抽中機率：'+prob.toFixed(1)+'%</div>';
+        rb.classList.remove('flash');
+        void rb.offsetWidth;
+        rb.classList.add('flash');
+
+        var now = new Date();
+        var ts  = now.getFullYear()+'/'+(now.getMonth()+1)+'/'+(now.getDate())+
+                  ' '+now.getHours()+':'+(now.getMinutes()<10?'0':'')+now.getMinutes();
+        addHistory(ts+' → '+winner.name+'（'+winner.days+'天，'+prob.toFixed(1)+'%）', chosen);
+
+        if (chosen) {
+            setTimeout(function(){ showChosen(winner, prob); }, 400);
+        }
+    }, duration);
+}
+
+// =============================================
+// 天選之人特效
+// =============================================
+function showChosen(winner, prob) {
+    document.getElementById('chosenName').textContent = winner.name;
+    document.getElementById('chosenSub').textContent  = '長差天數：'+winner.days+' 天';
+    document.getElementById('chosenProb').textContent = '抽中機率僅 '+prob.toFixed(1)+'%，命中注定 🔥';
+    document.getElementById('chosenOv').classList.add('active');
+    startConfetti();
+}
+function closeCh
