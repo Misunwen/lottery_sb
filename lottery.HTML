@@ -87,46 +87,163 @@ td{padding:9px 12px;text-align:center;vertical-align:middle}
 /* 進度提示（多人抽籤用） */
 .slot-prog{color:#a0aec0;font-size:.88rem;margin-top:14px;letter-spacing:1px}
 
-/* ===== 天選之人 Overlay（白底卡片） ===== */
-#ov2{display:none;position:fixed;inset:0;z-index:2000;justify-content:center;align-items:center;background:rgba(0,0,0,.6)}
-#ov2.on{display:flex}
-#cv{position:fixed;inset:0;pointer-events:none;z-index:1999}
-/* 白底卡片 */
+/* ===== 天選之人 Overlay 加強版 ===== */
+#ov2{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:2000;
+  justify-content:center;
+  align-items:center;
+  background:rgba(0,0,0,.75);
+}
+#ov2.on{
+  display:flex;  /* 一定要是 flex，才能讓子元素置中 */
+  animation:bgPulse 2s ease-in-out infinite;
+}
+/* 加入這段（原本完全沒有 #cv 的樣式） */
+#cv{
+  position:fixed;  /* 脫離 flex 排版，不佔位置 */
+  inset:0;
+  pointer-events:none;
+  z-index:2001;    /* 在卡片下面，彩帶在卡片上飄 */
+}
+@keyframes bgPulse{
+  0%,100%{background:rgba(0,0,0,.75)}
+  50%{background:rgba(30,0,60,.85)}
+}
+/* 白底卡片本體 */
 .chosen-card{
-  position:relative;z-index:1;
-  background:#fff;
+  position:relative;
+  z-index:2002;    /* 比 canvas 高，卡片永遠在最上層 */
+  background:linear-gradient(160deg,#fff 60%,#f3e8ff 100%);
   border-radius:24px;
   padding:44px 52px 36px;
   text-align:center;
-  box-shadow:0 20px 60px rgba(0,0,0,.35), 0 0 0 4px #ffd700;
-  animation:pop .8s cubic-bezier(.34,1.56,.64,1);
-  max-width:420px; width:90%;
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.35),
+    0 0 0 4px #ffd700,
+    0 0 40px rgba(255,215,0,.6),
+    0 0 80px rgba(255,215,0,.3);
+  animation:pop .8s cubic-bezier(.34,1.56,.64,1),
+            cardGlow 2s ease-in-out infinite .8s;
+  max-width:420px;
+  width:90%;
+  overflow:hidden;
 }
-@keyframes pop{0%{transform:scale(0) rotate(-10deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
-.ccrown{font-size:4.5rem;animation:fy 2s ease-in-out infinite;display:block;margin-bottom:4px}
-@keyframes fy{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-.clbl{font-size:1.15rem;color:#764ba2;letter-spacing:6px;margin:6px 0 14px;font-weight:700}
-.cname{font-size:3.2rem;font-weight:700;color:#2d3748;margin:6px 0}
-.csub{font-size:.95rem;color:#718096;letter-spacing:1px;margin-top:4px}
-.cprob{font-size:.85rem;color:#e53e3e;font-weight:700;margin-top:8px;background:#fff5f5;padding:5px 14px;border-radius:20px;display:inline-block}
-/* 多人得獎列表 */
-.clist{margin:12px 0 4px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
-.ctag{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:6px 18px;border-radius:20px;font-size:1rem;font-weight:700}
-.cbtn{margin-top:24px;padding:11px 38px;background:linear-gradient(135deg,#667eea,#764ba2);border:none;border-radius:28px;font-size:1rem;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;transition:transform .2s,box-shadow .2s}
-.cbtn:hover{transform:scale(1.05);box-shadow:0 6px 20px rgba(102,126,234,.5)}
-/* Toast */
-#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(70px);background:#2d3748;color:#fff;padding:11px 24px;border-radius:28px;font-size:.9rem;opacity:0;transition:all .3s;z-index:9999;pointer-events:none;white-space:nowrap}
-#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-@media(max-width:600px){
-  .sec{padding:16px}
-  .acts{padding:14px}
-  .rbox{margin:14px}
-  .hdr h1{font-size:1.5rem}
-  .chosen-card{padding:30px 24px 26px}
-  .cname{font-size:2.4rem}
-  .slot{padding:32px 24px;min-width:260px}
-  .sdisp{font-size:1.6rem}
+/* 卡片金色光掃特效 */
+.chosen-card::before{
+  content:"";
+  position:absolute;top:0;left:-100%;
+  width:60%;height:100%;
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,.6),transparent);
+  animation:shine 2.5s ease-in-out infinite 1s;
+  pointer-events:none;
 }
+@keyframes shine{
+  0%{left:-100%}
+  40%,100%{left:150%}
+}
+/* 卡片持續發光脈動 */
+@keyframes cardGlow{
+  0%,100%{
+    box-shadow:
+      0 20px 60px rgba(0,0,0,.35),
+      0 0 0 4px #ffd700,
+      0 0 40px rgba(255,215,0,.6),
+      0 0 80px rgba(255,215,0,.3);
+  }
+  50%{
+    box-shadow:
+      0 20px 60px rgba(0,0,0,.35),
+      0 0 0 4px #ffd700,
+      0 0 60px rgba(255,215,0,.9),
+      0 0 120px rgba(255,215,0,.5);
+  }
+}
+@keyframes pop{
+  0%{transform:scale(0) rotate(-10deg);opacity:0}
+  100%{transform:scale(1) rotate(0);opacity:1}
+}
+/* 皇冠（加大＋更明顯的浮動） */
+.ccrown{
+  font-size:5.5rem;
+  animation:crownFloat 1.8s ease-in-out infinite;
+  display:block;margin-bottom:4px;
+  filter:drop-shadow(0 0 12px rgba(255,215,0,.9));
+}
+@keyframes crownFloat{
+  0%,100%{transform:translateY(0) rotate(-5deg) scale(1)}
+  50%{transform:translateY(-16px) rotate(5deg) scale(1.1)}
+}
+/* 標題文字（彩虹流光） */
+.clbl{
+  font-size:1.2rem;
+  letter-spacing:6px;
+  margin:6px 0 14px;
+  font-weight:700;
+  background:linear-gradient(90deg,#667eea,#f6ad55,#fc8181,#764ba2,#667eea);
+  background-size:200%;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:rainbow 3s linear infinite;
+}
+@keyframes rainbow{
+  0%{background-position:0%}
+  100%{background-position:200%}
+}
+/* 得獎者名字（加大＋文字陰影＋跳動） */
+.cname{
+  font-size:3.6rem;font-weight:700;
+  color:#2d3748;margin:6px 0;
+  animation:nameJump 1s ease-in-out infinite .8s;
+  text-shadow:2px 2px 0 rgba(102,126,234,.2);
+}
+@keyframes nameJump{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.06)}
+}
+/* 機率標籤（閃爍紅色） */
+.cprob{
+  font-size:.85rem;color:#e53e3e;font-weight:700;
+  margin-top:8px;background:#fff5f5;
+  padding:5px 14px;border-radius:20px;display:inline-block;
+  animation:probBlink 1.2s ease-in-out infinite;
+  border:1px solid #fc8181;
+}
+@keyframes probBlink{
+  0%,100%{
+    background:#fff5f5;
+    box-shadow:0 0 0 rgba(252,129,129,0);
+  }
+  50%{
+    background:#fed7e2;
+    box-shadow:0 0 12px rgba(252,129,129,.6);
+  }
+}
+/* 確認按鈕（加強 hover） */
+.cbtn{
+  margin-top:24px;padding:11px 38px;
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  border:none;border-radius:28px;
+  font-size:1rem;font-weight:700;color:#fff;
+  cursor:pointer;font-family:inherit;
+  transition:transform .2s,box-shadow .2s;
+  position:relative;overflow:hidden;
+}
+.cbtn::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.2),transparent);
+  opacity:0;transition:opacity .2s;
+}
+.cbtn:hover{
+  transform:scale(1.08);
+  box-shadow:0 8px 24px rgba(102,126,234,.6);
+}
+.cbtn:hover::after{opacity:1;}
+.cbtn:active{transform:scale(.97)}
+
 </style>
 </head>
 <body>
@@ -502,34 +619,70 @@ function closeChosen(){
   var c=document.getElementById('cv');
   c.getContext('2d').clearRect(0,0,c.width,c.height);
 }
-/* ---- Confetti ---- */
+/* ===== 彩帶動畫加強版 ===== */
 function launchConfetti(){
   var c=document.getElementById('cv');
-  c.width=window.innerWidth; c.height=window.innerHeight;
+  c.width=window.innerWidth;
+  c.height=window.innerHeight;
   var ctx=c.getContext('2d');
-  var cols=['#ffd700','#ff8c00','#ff4500','#667eea','#48bb78','#fc8181','#b794f4'];
+  var cols=[
+    '#ffd700','#ff8c00','#ff4500',
+    '#667eea','#764ba2','#48bb78',
+    '#fc8181','#b794f4','#4affb4','#f6e05e'
+  ];
   var parts=[];
-  for(var i=0;i<160;i++){
+  // 產生 250 個粒子（比原本多）
+  for(var i=0;i<250;i++){
+    var shape=Math.random()<0.3?'circle':'rect'; // 30% 是圓形
     parts.push({
-      x:Math.random()*c.width, y:-20,
-      w:7+Math.random()*9, h:4+Math.random()*6,
+      x:Math.random()*c.width,
+      y:-20 - Math.random()*200, // 不同高度出發，分批落下
+      w:5+Math.random()*11,
+      h:4+Math.random()*7,
+      r:3+Math.random()*5,       // 圓形半徑
       color:cols[Math.floor(Math.random()*cols.length)],
-      vx:(Math.random()-.5)*5, vy:2+Math.random()*4,
-      rot:Math.random()*360, vr:(Math.random()-.5)*7
+      vx:(Math.random()-.5)*6,
+      vy:1.5+Math.random()*4,
+      rot:Math.random()*360,
+      vr:(Math.random()-.5)*8,
+      alpha:1,
+      shape:shape,
+      // 飄動效果用的參數
+      swing:Math.random()*2,
+      swingSpeed:0.02+Math.random()*0.03,
+      swingOffset:Math.random()*Math.PI*2,
     });
   }
+  var tick=0;
   function frame(){
     ctx.clearRect(0,0,c.width,c.height);
+    tick++;
     var alive=false;
     for(var i=0;i<parts.length;i++){
       var p=parts[i];
-      p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr;
-      if(p.y<c.height+20) alive=true;
+      // 左右飄動
+      p.x += p.vx + Math.sin(tick*p.swingSpeed + p.swingOffset)*p.swing;
+      p.y += p.vy;
+      p.rot += p.vr;
+      // 快落出畫面時漸漸透明
+      if(p.y > c.height*0.75){
+        p.alpha = Math.max(0, 1-(p.y-c.height*0.75)/(c.height*0.25));
+      }
+      if(p.y < c.height+30) alive=true;
       ctx.save();
-      ctx.translate(p.x,p.y);
+      ctx.globalAlpha=p.alpha;
+      ctx.translate(p.x, p.y);
       ctx.rotate(p.rot*Math.PI/180);
       ctx.fillStyle=p.color;
-      ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      if(p.shape==='circle'){
+        // 圓形粒子
+        ctx.beginPath();
+        ctx.arc(0,0,p.r,0,Math.PI*2);
+        ctx.fill();
+      } else {
+        // 矩形粒子
+        ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      }
       ctx.restore();
     }
     if(alive) cfId=requestAnimationFrame(frame);
