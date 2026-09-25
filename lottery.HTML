@@ -67,6 +67,23 @@ tbody tr.drawn input{text-decoration:line-through;pointer-events:none}
 .hlist li{padding:6px 10px;background:#f7f5ff;border-left:4px solid #667eea;border-radius:0 6px 6px 0;font-size:.78rem;color:#4a5568}
 .hlist li.hc{background:#fffff0;border-left-color:#f6e05e}
 .hemp{color:#a0aec0;font-size:.8rem;text-align:center;padding:8px}
+.slots{display:flex;flex-direction:column;gap:8px}
+.sitem{display:flex;flex-direction:column;gap:6px;padding:10px 12px;background:#f7f5ff;border:2px solid #e2e8f0;border-radius:10px}
+.srow{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.shead{font-weight:700;color:#4a5568;font-size:.88rem}
+.sinfo{font-weight:400;color:#a0aec0;font-size:.78rem;margin-left:4px}
+.sbtns{display:flex;gap:6px;flex-wrap:wrap}
+.spreview{font-size:.78rem;color:#718096;line-height:1.5;word-break:break-all}
+#pvw{display:none;position:fixed;inset:0;z-index:3100;justify-content:center;align-items:center;background:rgba(0,0,0,.6);padding:20px}
+#pvw.on{display:flex}
+.pvw-box{background:#fff;border-radius:16px;padding:20px;max-width:400px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,0,0,.35);animation:pop .25s ease}
+.pvw-title{font-weight:700;color:#4a5568;font-size:.95rem;margin-bottom:12px;text-align:center}
+.pvw-list{overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:4px;margin-bottom:14px}
+.pvw-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#f7f5ff;border-radius:8px;font-size:.85rem}
+.pvw-idx{color:#a0aec0;min-width:20px}
+.pvw-name{font-weight:700;color:#2d3748;flex:1;word-break:break-all}
+.pvw-w{color:#553c9a;font-weight:700;font-size:.78rem;white-space:nowrap}
+.pvw-close{width:100%;padding:11px;border:none;border-radius:10px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-size:.95rem;font-family:inherit;font-weight:700;cursor:pointer;min-height:44px}
 #ov1{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:1000;justify-content:center;align-items:center}
 #ov1.on{display:flex}
 .slot{background:linear-gradient(160deg,#1a1a2e,#16213e,#0f3460);border:3px solid #f6ad55;border-radius:16px;padding:28px 20px;text-align:center;box-shadow:0 0 45px rgba(246,173,85,.4);margin:0 12px}
@@ -259,6 +276,11 @@ tbody tr.drawn input{text-decoration:line-through;pointer-events:none}
   </div>
 
   <div class="sec">
+    <div class="stitle">名單儲存（本機 3 組）</div>
+    <div class="slots" id="slots"></div>
+  </div>
+
+  <div class="sec">
     <div class="stitle">抽籤歷史</div>
     <ul class="hlist" id="hl"><li class="hemp">尚無紀錄</li></ul>
   </div>
@@ -295,7 +317,14 @@ tbody tr.drawn input{text-decoration:line-through;pointer-events:none}
 
 <div id="toast"></div>
 
-<!-- 確認對話框 -->
+<!-- 名單預覽彈窗 -->
+<div id="pvw">
+  <div class="pvw-box">
+    <div class="pvw-title" id="pvwTitle"></div>
+    <div class="pvw-list" id="pvwList"></div>
+    <button class="pvw-close" id="pvwClose">關閉</button>
+  </div>
+</div>
 <div id="mdl">
   <div class="mdl-box">
     <div class="mdl-msg" id="mdlMsg"></div>
@@ -307,9 +336,10 @@ tbody tr.drawn input{text-decoration:line-through;pointer-events:none}
 </div>
 
 <script>
-var SK_P='lp6_ppl', SK_H='lp6_hist';
+var SK_P='lp6_ppl', SK_H='lp6_hist', SK_S='lp6_slots';
 var PWR=1.585;
 var ppl=[], hist=[], cfId=null;
+var slots=jLoad(SK_S)||[];
 var repeatOn=false, drawnNames={}, repeatOrder=[];
 var slotSkip=false, slotFinish=null;
 
@@ -334,6 +364,11 @@ function rnd(){
 }
 /* 震動回饋（手機支援才作用） */
 function vibrate(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
+/* 目前時間字串 */
+function nowStr(){
+  var d=new Date();
+  return d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate()+' '+d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes();
+}
 /* 自製確認框（取代手機無法自訂樣式的 confirm）*/
 function showConfirm(msg, onOk){
   var ov=document.getElementById('mdl');
@@ -544,6 +579,88 @@ function clearPpl(){
     render();
     toast('🗑 人員已全部清除');
   });
+}
+
+/* ---- 名單儲存（本機 3 組）---- */
+function renderSlots(){
+  var wrap=document.getElementById('slots');
+  if(!wrap) return;
+  wrap.innerHTML='';
+  for(var i=0;i<3;i++){
+    var s=slots[i];
+    var has=s&&s.ppl&&s.ppl.length;
+    var info=has?(s.ppl.length+' 人 · '+s.ts):'（空）';
+    var prev='';
+    if(has){
+      var nm=[], lim=Math.min(s.ppl.length,10);
+      for(var k=0;k<lim;k++) nm.push(eh(s.ppl[k].name));
+      prev=nm.join('、')+(s.ppl.length>10?'…等 '+s.ppl.length+' 人':'');
+    }
+    var div=document.createElement('div');
+    div.className='sitem';
+    div.innerHTML=
+      '<div class="srow">'+
+        '<div class="shead">第 '+(i+1)+' 組 <span class="sinfo">'+eh(info)+'</span></div>'+
+        '<div class="sbtns">'+
+          '<button class="btn bs bsm" data-a="save" data-i="'+i+'">💾 儲存</button>'+
+          '<button class="btn bi bsm" data-a="load" data-i="'+i+'">📂 讀取</button>'+
+          '<button class="btn bw bsm" data-a="preview" data-i="'+i+'">👁 預覽</button>'+
+          '<button class="btn bd bsm" data-a="del" data-i="'+i+'">🗑</button>'+
+        '</div>'+
+      '</div>'+
+      (prev?'<div class="spreview">'+prev+'</div>':'');
+    wrap.appendChild(div);
+  }
+}
+function slotPreview(i){
+  var s=slots[i];
+  if(!s||!s.ppl||!s.ppl.length){ toast('⚠ 第 '+(i+1)+' 組是空的',true); return; }
+  document.getElementById('pvwTitle').textContent='第 '+(i+1)+' 組（'+s.ppl.length+' 人 · '+s.ts+'）';
+  var html='';
+  for(var k=0;k<s.ppl.length;k++){
+    html+='<div class="pvw-row"><span class="pvw-idx">'+(k+1)+'</span>'+
+          '<span class="pvw-name">'+eh(s.ppl[k].name)+'</span>'+
+          '<span class="pvw-w">加權 '+s.ppl[k].days+'</span></div>';
+  }
+  document.getElementById('pvwList').innerHTML=html;
+  document.getElementById('pvw').classList.add('on');
+}
+function closePreview(){ document.getElementById('pvw').classList.remove('on'); }
+function slotSave(i){
+  if(!ppl.length){ toast('⚠ 尚無人員可儲存',true); return; }
+  slots[i]={ppl:JSON.parse(JSON.stringify(ppl)), ts:nowStr()};
+  jSave(SK_S,slots); renderSlots();
+  toast('💾 已儲存到第 '+(i+1)+' 組（'+ppl.length+' 人）');
+}
+function slotLoad(i){
+  var s=slots[i];
+  if(!s||!s.ppl||!s.ppl.length){ toast('⚠ 第 '+(i+1)+' 組是空的',true); return; }
+  showConfirm('讀取第 '+(i+1)+' 組將覆蓋目前人員，確定？', function(){
+    ppl=JSON.parse(JSON.stringify(s.ppl));
+    drawnNames={}; repeatOrder=[]; repeatOn=false;
+    var btn=document.getElementById('btnRepeat');
+    btn.classList.remove('on'); btn.textContent='🔁 重複抽取(關閉)';
+    document.getElementById('rbox').innerHTML='<div class="rw">尚未抽籤，請先新增人員再按「開始抽籤」</div>';
+    jSave(SK_P,ppl);
+    render();
+    toast('📂 已讀取第 '+(i+1)+' 組（'+ppl.length+' 人）');
+  });
+}
+function slotDel(i){
+  if(!slots[i]){ toast('⚠ 第 '+(i+1)+' 組是空的',true); return; }
+  showConfirm('清除第 '+(i+1)+' 組的儲存名單？', function(){
+    slots[i]=null; jSave(SK_S,slots); renderSlots();
+    toast('🗑 已清除第 '+(i+1)+' 組');
+  });
+}
+function onSlotClick(e){
+  var b=e.target.closest?e.target.closest('button'):null;
+  if(!b) return;
+  var a=b.getAttribute('data-a'), i=parseInt(b.getAttribute('data-i'),10);
+  if(a==='save') slotSave(i);
+  else if(a==='load') slotLoad(i);
+  else if(a==='preview') slotPreview(i);
+  else if(a==='del') slotDel(i);
 }
 
 /* ---- 歷史 ---- */
@@ -930,6 +1047,7 @@ window.onload=function(){
   hist = jLoad(SK_H) || [];
   render();
   renderH();
+  renderSlots();
   document.getElementById('btnAdd').addEventListener('click', addPerson);
   document.getElementById('btnRefresh').addEventListener('click', render);
   document.getElementById('btnDraw').addEventListener('click', drawLottery);
@@ -940,6 +1058,9 @@ window.onload=function(){
   document.getElementById('btnClearPpl').addEventListener('click', clearPpl);
   document.getElementById('btnClose').addEventListener('click', closeChosen);
   document.getElementById('btnSkip').addEventListener('click', skipSlot);
+  document.getElementById('slots').addEventListener('click', onSlotClick);
+  document.getElementById('pvwClose').addEventListener('click', closePreview);
+  document.getElementById('pvw').addEventListener('click', function(e){ if(e.target===document.getElementById('pvw')) closePreview(); });
   document.getElementById('btnImport').addEventListener('click', function(){
     document.getElementById('csvFile').click();
   });
