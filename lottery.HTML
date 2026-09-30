@@ -446,7 +446,17 @@ function getDisplayProbs(){
       pw.splice(j,1); ord.splice(j,1);
     }
   }
-  for(var a=0;a<n;a++) out[active[a]]=cnt[a]/sims*100;
+  /* 同權重者理論上機率相同 → 取群組平均後統一套用，消除估算雜訊 */
+  var gSum={}, gCnt={}, gKey=new Array(n);
+  for(var a=0;a<n;a++){
+    var key=Math.round(poolW[a]*1000);
+    gKey[a]=key;
+    gSum[key]=(gSum[key]||0)+cnt[a];
+    gCnt[key]=(gCnt[key]||0)+1;
+  }
+  for(var a=0;a<n;a++){
+    out[active[a]]=(gSum[gKey[a]]/gCnt[gKey[a]])/sims*100;
+  }
   return out;
 }
 
